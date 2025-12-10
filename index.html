@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Cours SQL pour ceux qui n’ont JAMAIS vu une base de données – 2025</title>
+<style>
+  :root{--bg:#f9fafc;--c:#fff;--p:#e11d48;--s:#3b82f6;--t:#1e293b}
+  body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--t);margin:0;line-height:1.7}
+  .wrap{max-width:1000px;margin:2rem auto;padding:0 1rem}
+  header{background:linear-gradient(135deg,var(--p),var(--s));color:#fff;text-align:center;padding:4rem 1rem;border-radius:20px}
+  h1{font-size:3rem;margin:0}
+  section{background:var(--c);margin:2.5rem 0;padding:2.5rem;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+  .h{font-size:2rem;color:var(--p);border-bottom:4px solid var(--p);padding-bottom:10px;margin-bottom:1.5rem}
+  .theory{background:#fef3c7;padding:2rem;border-radius:16px;margin:1.5rem 0;border-left:8px solid #f59e0b;font-size:1.3rem;font-weight:600}
+  .practice{background:#dbeafe;padding:2rem;border-radius:16px;margin:1.5rem 0;border-left:8px solid var(--s);font-size:1.2rem}
+  pre{background:#0f172a;color:#e2e8f0;padding:1.5rem;border-radius:12px;overflow-x:auto;font-size:1rem}
+  .ex{background:#ecfdf5;padding:1.5rem;border-left:6px solid #10b981;border-radius:12px;margin:2rem 0}
+  .tip{background:#f3f4f6;padding:1.5rem;border-radius:12px;margin:1.5rem 0;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header>
+  <h1>SQL pour les vrais débutants</h1>
+  <p>Tu n’as jamais vu une base de données ? À la fin de ce cours tu seras capable de créer, remplir et utiliser une base complète.</p>
+</header>
+
+<!-- 1. C’est quoi une base de données ? -->
+<section>
+<div class="h">1. Une base de données, c’est quoi ?</div>
+<div class="theory">
+    Une base de données = un gros tableau Excel, mais qui ne plante jamais, qui accepte des millions de lignes, et où tu peux chercher n’importe quoi en 0,01 seconde.<br><br>
+    Dans la vraie vie : Facebook, Netflix, ta banque, Amazon → tout tourne avec des bases de données.
+</div>
+<div class="practice">
+    Imagine un fichier Excel avec 3 onglets :<br>
+    • Utilisateurs → pseudo, email<br>
+    • Blagues → question, réponse, qui l’a écrite<br>
+    • Likes → qui a liké quelle blague<br>
+    → C’est exactement une base de données SQL.
+</div>
+</section>
+
+<!-- 2. Les différents types -->
+<section>
+<div class="h">2. Les 2 grandes familles (c’est tout ce que tu dois savoir)</div>
+<div class="theory">
+<strong>SQL (relationnel)</strong> → des tableaux bien rangés avec des règles strictes. Parfait pour l’argent, les utilisateurs, les commandes.<br>
+<strong>NoSQL</strong> → des fichiers JSON souples. Parfait pour les messages, les logs, les trucs qui changent souvent.
+</div>
+<div class="practice">
+    Pour 95 % des projets sérieux → on utilise du SQL.<br>
+    On va donc apprendre SQL (MySQL/MariaDB/PostgreSQL → c’est presque pareil).
+</div>
+</section>
+
+<!-- 3. Installation rapide -->
+<section>
+<div class="h">3. Installation en 30 secondes (Ubuntu/Debian/Mac)</div>
+<div class="practice">
+<pre># Ubuntu / Debian
+sudo apt update && sudo apt install mariadb-server -y
+sudo systemctl start mariadb
+# Mac (avec Homebrew)
+brew install mariadb
+brew services start mariadb</pre>
+<div class="tip">Tu as maintenant un vrai serveur SQL qui tourne sur ton ordi.</div>
+</div>
+</section>
+
+<!-- 4. Accéder à la base -->
+<section>
+<div class="h">4. Deux façons d’accéder (CLI + phpMyAdmin)</div>
+<div class="practice">
+<strong>En ligne de commande (le plus rapide)</strong>
+<pre>sudo mysql # connexion directe
+mysql -u root -p # tu tapes ton mot de passe (vide au début)</pre>
+<strong>Avec phpMyAdmin (interface web jolie)</strong>
+<pre># Installation rapide
+sudo apt install phpmyadmin
+# puis ouvre http://localhost/phpmyadmin</pre>
+</div>
+</section>
+
+<!-- 5. Créer sa première base -->
+<section>
+<div class="h">5. Créer sa première base de données</div>
+<div class="practice">
+    Copie-colle ça dans ton terminal SQL :
+<pre>CREATE DATABASE blagues_en_folie;
+USE blagues_en_folie;</pre>
+<div class="ex">Tu viens de créer ta première base et tu es dedans.</div>
+</div>
+</section>
+
+<!-- 6. Les modèles : MCD / MLD / UML (vulgarisé) -->
+<section>
+<div class="h">6. Comment on conçoit une base (en 3 dessins)</div>
+<div class="theory">
+<strong>MCD</strong> → dessin avec des boîtes (utilisateur, blague) et des flèches (qui écrit quoi).<br>
+<strong>MLD</strong> → on transforme le dessin en vraies tables avec des id.<br>
+<strong>UML</strong> → même chose mais plus orienté programmation.
+</div>
+<div class="practice">
+    Pour notre projet blagues :
+<pre>Utilisateur (id, pseudo)
+Blague (id, question, réponse, auteur_id → lien vers utilisateur)
+Like (utilisateur_id, blague_id)</pre>
+<div class="tip">Tu n’as besoin que de ça pour 99 % des projets.</div>
+</div>
+</section>
+
+<!-- 7. Les types de données les plus utilisés -->
+<section>
+<div class="h">7. Les types que tu vas utiliser tout le temps</div>
+<div class="practice">
+<pre>INT → nombre entier (id, âge)
+VARCHAR(255) → texte court (pseudo, email)
+TEXT → texte long (description)
+DATE / DATETIME → date et heure
+TINYINT(1) → vrai/faux (0 ou 1)
+AUTO_INCREMENT → le nombre augmente tout seul</pre>
+</div>
+</section>
+
+<!-- 8. Projet complet pas à pas -->
+<section>
+<div class="h">8. Projet complet : Blagues en Folie (tout faire en 5 minutes)</div>
+<div class="practice">
+    Copie-colle tout ça d’un coup dans ton terminal SQL :
+<pre>CREATE DATABASE blagues_en_folie CHARACTER SET utf8mb4;
+USE blagues_en_folie;
+-- 1. Table utilisateurs
+CREATE TABLE utilisateurs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  pseudo VARCHAR(50) UNIQUE NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+-- 2. Table blagues
+CREATE TABLE blagues (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  question VARCHAR(500) NOT NULL,
+  reponse VARCHAR(500) NOT NULL,
+  auteur_id INT,
+  likes INT DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (auteur_id) REFERENCES utilisateurs(id) ON DELETE SET NULL
+);
+-- 3. On remplit
+INSERT INTO utilisateurs (pseudo, email) VALUES
+('Alice', 'alice@mail.com'),
+('Bob', 'bob@mail.com'),
+('Toto', 'toto@mail.com');
+INSERT INTO blagues (question, reponse, auteur_id) VALUES
+('Pourquoi les plongeurs plongent en arrière ?', 'Parce que sinon ils tombent dans le bateau !', 1),
+('Pourquoi JavaScript est triste ?', 'Parce qu’il a pas de class !', 2),
+('Comment appelle-t-on un boomerang qui ne revient pas ?', 'Un bâton.', 3);</pre>
+<div class="ex">Tu as maintenant une base complète avec 2 tables liées et des données !</div>
+</div>
+</section>
+
+<!-- 9. Manipuler les données (les 8 commandes que tu vas utiliser 95% du temps) -->
+<section>
+<div class="h">9. Les commandes que tu vas taper tous les jours</div>
+<div class="practice">
+<pre>-- Voir tout
+SELECT * FROM blagues;
+-- Filtrer
+SELECT * FROM blagues WHERE likes > 0;
+-- Trier
+SELECT * FROM blagues ORDER BY created_at DESC;
+-- Ajouter
+INSERT INTO blagues (question, reponse, auteur_id) VALUES ('Ta blague ?', 'Ta réponse !', 1);
+-- Modifier
+UPDATE blagues SET likes = likes + 1 WHERE id = 1;
+-- Supprimer
+DELETE FROM blagues WHERE id = 5;
+-- Joindre deux tables
+SELECT b.question, u.pseudo
+FROM blagues b
+JOIN utilisateurs u ON b.auteur_id = u.id;</pre>
+</div>
+
+<div class="wrap">
+
+<h1> Explications: <br> </h1>
+
+<!-- 1 -->
+<div class="cmd">SELECT * FROM blagues;</div>
+<div class="quoi">
+  <strong>Ce que ça fait vraiment :</strong><br>
+  Tu dis à la base : "Montre-moi TOUT ce qu’il y a dans la table blagues". Toutes les colonnes, toutes les lignes, sans exception.
+</div>
+<div class="explication">
+  <span class="excel">Équivalent Excel :</span> Tu ouvres le fichier et tu regardes tout le tableau, du haut jusqu’en bas.<br><br>
+  C’est la commande la plus simple et la plus utilisée pour vérifier que tout est bien là.
+</div>
+
+<!-- 2 -->
+<div class="cmd">SELECT * FROM blagues WHERE likes > 0;</div>
+<div class="quoi">
+  <strong>Ce que ça fait vraiment :</strong><br>
+  Tu dis : "Montre-moi seulement les blagues qui ont AU MOINS 1 like". Les blagues à 0 like sont cachées.
+</div>
+<div class="explication">
+  <span class="excel">Équivalent Excel :</span> Tu mets un filtre en haut de la colonne "likes" et tu coches "plus grand que 0".<br><br>
+  <span class="important">WHERE</span> = le filtre magique. Tu peux mettre =, >, <, >=, <=, !=, LIKE, IN…
+</div>
+
+<!-- 3 -->
+<div class="cmd">SELECT * FROM blagues ORDER BY created_at DESC;</div>
+<div class="quoi">
+  <strong>Ce que ça fait vraiment :</strong><br>
+  Tu dis : "Montre-moi toutes les blagues, mais trie-les par date de création, de la plus récente à la plus ancienne".
+</div>
+<div class="explication">
+  <span class="excel">Équivalent Excel :</span> Tu cliques sur la colonne "date" → "Trier du plus récent au plus ancien".<br><br>
+  <code>ORDER BY</code> = tri<br>
+  <code>DESC</code> = du plus grand au plus petit (DESCending)<br>
+  <code>ASC</code> = du plus petit au plus grand (ASCending → par défaut)
+</div>
+
+<!-- 4 -->
+<div class="cmd">INSERT INTO blagues (question, reponse, auteur_id) VALUES ('Ta blague ?', 'Ta réponse !', 1);</div>
+<div class="quoi">
+  <strong>Ce que ça fait vraiment :</strong><br>
+  Tu ajoutes une NOUVELLE blague dans la table. Tu précises quelles colonnes tu remplis et leurs valeurs.
+</div>
+<div class="explication">
+  <span class="excel">Équivalent Excel :</span> Tu descends tout en bas du tableau et tu remplis une nouvelle ligne.<br><br>
+  Tu peux ajouter plusieurs lignes d’un coup :<br>
+  <code>VALUES ('blague1', 'réponse1', 1), ('blague2', 'réponse2', 2);</code>
+</div>
+
+<!-- 5 -->
+<div class="cmd">UPDATE blagues SET likes = likes + 1 WHERE id = 1;</div>
+<div class="quoi">
+  <strong>Ce que ça fait vraiment :</strong><br>
+  Tu dis : "Prends la blague dont l’id est 1, et ajoute +1 à son nombre de likes".
+</div>
+<div class="explication">
+  <span class="excel">Équivalent Excel :</span> Tu trouves la ligne, tu vas dans la cellule "likes", tu ajoutes 1.<br><br>
+  <span class="important">ATTENTION :</span> Si tu oublies le <code>WHERE</code>, TOUTES les blagues auront +1 like → catastrophe !<br>
+  Toujours faire un <code>SELECT … WHERE …</code> avant pour vérifier que tu touches la bonne ligne.
+</div>
+
+<!-- 6 -->
+<div class="cmd">DELETE FROM blagues WHERE id = 5;</div>
+<div class="quoi">
+  <strong>Ce que ça fait vraiment :</strong><br>
+  Tu supprimes complètement la blague dont l’id est 5. Elle disparaît pour toujours (sauf si tu as une sauvegarde).
+</div>
+<div class="explication">
+  <span class="excel">Équivalent Excel :</span> Tu sélectionnes la ligne entière → Supprimer.<br><br>
+  Même règle que UPDATE : si tu oublies le <code>WHERE</code>, tu supprimes TOUTE la table → game over.
+</div>
+
+<!-- 7 -->
+<div class="cmd">SELECT b.question, u.pseudo
+FROM blagues b
+JOIN utilisateurs u ON b.auteur_id = u.id;</div>
+<div class="quoi">
+  <strong>Ce que ça fait vraiment :</strong><br>
+  Tu mélanges deux tables pour afficher la question + le pseudo de l’auteur en une seule ligne.
+</div>
+<div class="explication">
+  <span class="excel">Équivalent Excel :</span> Tu fais une rechercheV sur l’id de l’auteur pour aller chercher son pseudo dans l’autre onglet.<br><br>
+  <code>b</code> et <code>u</code> = surnoms (alias) pour écrire plus court.<br>
+  <code>JOIN … ON</code> = "relie les deux tables là où auteur_id = id".<br><br>
+  Tu peux faire :<br>
+  • <code>INNER JOIN</code> ou <code>JOIN</code> → seulement les blagues qui ont un auteur<br>
+  • <code>LEFT JOIN</code> → toutes les blagues, même si l’auteur est supprimé (pseudo = NULL)
+</div>
+
+<div style="background:#ecfdf5;padding:3rem;border-radius:20px;text-align:center;font-size:2rem;margin-top:3rem;color:#059669">
+  Tu viens de comprendre les 7 commandes que tu vas utiliser 95 % du temps.<br><br>
+  Tout le reste (transactions, index, vues…) c’est du bonus.<br>
+  Tu es officiellement dangereux en SQL
+</div>
+
+</div>
+</section>
+
+<!-- 11. Les relations en profondeur -->
+<section>
+<div class="h">11. Les relations entre tables (en profondeur)</div>
+<div class="theory">
+  Une relation, c’est le lien entre deux tables. Par exemple, une blague est liée à son auteur.<br><br>
+  <strong>Clé primaire</strong> → le numéro unique de chaque ligne (id).<br>
+  <strong>Clé étrangère</strong> → le numéro de l’autre table (auteur_id = id de l’utilisateur).<br><br>
+  Types de relations :<br>
+  - 1 à 1 : un utilisateur a un profil unique.<br>
+  - 1 à N : un utilisateur écrit plusieurs blagues.<br>
+  - N à N : plusieurs utilisateurs likent plusieurs blagues → on crée une table intermédiaire (likes).<br><br>
+  Avec ON DELETE SET NULL → si l’utilisateur est supprimé, la blague reste mais auteur_id devient NULL.
+</div>
+<div class="practice">
+  Exemple dans notre base :<br>
+  <pre>-- Ajoute une table likes (N à N)
+CREATE TABLE likes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  utilisateur_id INT,
+  blague_id INT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id) ON DELETE CASCADE,
+  FOREIGN KEY (blague_id) REFERENCES blagues(id) ON DELETE CASCADE
+);</pre>
+  <div class="ex">Ajoute un like : <code>INSERT INTO likes (utilisateur_id, blague_id) VALUES (2, 1);</code><br>
+  Affiche les likes : <code>SELECT u.pseudo, b.question FROM likes l JOIN utilisateurs u ON l.utilisateur_id = u.id JOIN blagues b ON l.blague_id = b.id;</code></div>
+</div>
+<div class="ex"><strong>Exercice :</strong> Crée une table "commentaires" (id, texte, blague_id, utilisateur_id). Ajoute 2 commentaires et affiche-les avec le pseudo et la question de la blague.</div>
+</section>
+
+<!-- 10. Exercices rapides (ÉTENDU AVEC 10 EXERCICES DÉTAILLÉS) -->
+<section>
+<div class="h">10. 10 exercices pour monter en compétences (clairs et fluides)</div>
+<div class="ex">
+  <strong>Exercice 1 : Créer une base de données</strong><br>
+  Crée une base appelée "ma_base_test".<br>
+  Exemple expliqué : <code>CREATE DATABASE ma_base_test;</code> → Ça crée un espace vide pour tes tables. Ensuite <code>USE ma_base_test;</code> pour entrer dedans. Résultat : tu as une base prête.
+</div>
+<div class="ex">
+  <strong>Exercice 2 : Créer 3 tables avec propriétés</strong><br>
+  Crée 3 tables : utilisateurs (id INT AUTO_INCREMENT PRIMARY KEY, pseudo VARCHAR(50)), blagues (id INT AUTO_INCREMENT PRIMARY KEY, question TEXT), likes (id INT AUTO_INCREMENT PRIMARY KEY, blague_id INT).<br>
+  Exemple expliqué : Chaque table a un id unique qui s'incrémente auto, et des propriétés comme VARCHAR pour du texte court, TEXT pour du long texte. Résultat : tu as 3 tables prêtes à recevoir des données.
+</div>
+<div class="ex">
+  <strong>Exercice 3 : Modifier une table</strong><br>
+  Ajoute une colonne "email" à la table utilisateurs.<br>
+  Exemple expliqué : <code>ALTER TABLE utilisateurs ADD COLUMN email VARCHAR(100);</code> → Ça ajoute une nouvelle propriété à la table sans toucher aux données existantes. Résultat : ta table est mise à jour sans perte.
+</div>
+<div class="ex">
+  <strong>Exercice 4 : Mettre à jour des données</strong><br>
+  Change le pseudo d'un utilisateur avec id = 1 en "SuperToto".<br>
+  Exemple expliqué : <code>UPDATE utilisateurs SET pseudo = 'SuperToto' WHERE id = 1;</code> → Ça modifie seulement la ligne avec id=1. Résultat : les données sont mises à jour sans affecter le reste.
+</div>
+<div class="ex">
+  <strong>Exercice 5 : Ajouter des données</strong><br>
+  Ajoute un utilisateur "Riri" avec email "riri@mail.com".<br>
+  Exemple expliqué : <code>INSERT INTO utilisateurs (pseudo, email) VALUES ('Riri', 'riri@mail.com');</code> → Ça ajoute une nouvelle ligne. Résultat : ta table grandit d’une ligne.
+</div>
+<div class="ex">
+  <strong>Exercice 6 : Supprimer des données</strong><br>
+  Supprime l'utilisateur avec id = 2.<br>
+  Exemple expliqué : <code>DELETE FROM utilisateurs WHERE id = 2;</code> → Ça supprime seulement cette ligne. Résultat : la table est nettoyée sans toucher les autres.
+</div>
+<div class="ex">
+  <strong>Exercice 7 : Filtrer et trier</strong><br>
+  Affiche les blagues avec plus de 1 like, triées par date.<br>
+  Exemple expliqué : <code>SELECT * FROM blagues WHERE likes > 1 ORDER BY created_at DESC;</code> → WHERE filtre, ORDER BY trie. Résultat : tu vois seulement ce que tu veux, rangé.
+</div>
+<div class="ex">
+  <strong>Exercice 8 : Joindre deux tables</strong><br>
+  Affiche les blagues avec le pseudo de l’auteur.<br>
+  Exemple expliqué : <code>SELECT b.question, u.pseudo FROM blagues b JOIN utilisateurs u ON b.auteur_id = u.id;</code> → JOIN relie les tables. Résultat : tu vois les données de 2 tables en 1 requête.
+</div>
+<div class="ex">
+  <strong>Exercice 9 : Sauvegarder et restaurer</strong><br>
+  Sauvegarde ta base, supprime-la, et restaure-la.<br>
+  Exemple expliqué : <code>mysqldump -u root blagues_en_folie > backup.sql</code> (sauvegarde), <code>DROP DATABASE blagues_en_folie</code> (supprime), <code>CREATE DATABASE blagues_en_folie</code> puis <code>mysql -u root blagues_en_folie < backup.sql</code> (restaure). Résultat : ta base est en sécurité.
+</div>
+<div class="ex">
+  <strong>Exercice 10 : Challenge complet</strong><br>
+  Crée une table "commentaires" liée à blagues et utilisateurs, ajoute 3 commentaires, et affiche-les avec le pseudo et la question de la blague.<br>
+  Exemple expliqué : Crée la table avec FOREIGN KEY, INSERT 3 lignes, puis SELECT avec JOIN. Résultat : tu as une base liée sur 3 tables.
+</div>
+</section>
+
+</div>
+
+</body>
+</html>
